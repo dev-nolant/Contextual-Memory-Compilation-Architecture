@@ -15,23 +15,23 @@ pub fn execute_eeg_with_context(
     let mut execution_trace = Vec::new();
     let mut reinforcement_signals = Vec::new();
     let mut branch_decisions = HashMap::new();
-    let mut fragment_outcomes = Vec::new(); 
-    
+    let mut fragment_outcomes = Vec::new();
+
     let mut current_node_id = eeg.entry_point;
     let mut visited = HashSet::new();
-    
+
     while let Some(node) = eeg.nodes.get(&current_node_id) {
         if visited.contains(&current_node_id) {
             break;
         }
         visited.insert(current_node_id);
         execution_trace.push(current_node_id);
-        
+
         match &node.content {
             NodeContent::Fragment { fragment_id, .. } => {
                 if let Some(fragment) = memory.fragments.get(fragment_id) {
                     let outcome = interpret_fragment(fragment);
-                    fragment_outcomes.push(outcome.clone()); 
+                    fragment_outcomes.push(outcome.clone());
                     if outcome.outcome_type == OutcomeType::Success {
                         reinforcement_signals.push(ReinforcementSignal {
                             fragment_id: *fragment_id,
@@ -42,8 +42,7 @@ pub fn execute_eeg_with_context(
                     }
                 }
             }
-            NodeContent::GapFill { .. } => {
-            }
+            NodeContent::GapFill { .. } => {}
             NodeContent::Decision { branches, .. } => {
                 if let Some(branch) = branches.first() {
                     branch_decisions.insert(current_node_id, branch.target_node);
@@ -51,16 +50,17 @@ pub fn execute_eeg_with_context(
                     continue;
                 }
             }
-            NodeContent::Conflict { selected_fragment, .. } => {
+            NodeContent::Conflict {
+                selected_fragment, ..
+            } => {
                 if let Some(frag_id) = selected_fragment {
                     current_node_id = *frag_id;
                     continue;
                 }
             }
-            NodeContent::Action { .. } => {
-            }
+            NodeContent::Action { .. } => {}
         }
-        
+
         let next_edge = eeg.edges.iter().find(|e| e.from_node == current_node_id);
         if let Some(edge) = next_edge {
             current_node_id = edge.to_node;
@@ -68,17 +68,13 @@ pub fn execute_eeg_with_context(
             break;
         }
     }
-    
+
     let time_taken = current_timestamp() - start_time;
-    
-    
+
     let outcome = if !fragment_outcomes.is_empty() {
-        
-        let results: Vec<String> = fragment_outcomes.iter()
-            .map(|o| o.result.clone())
-            .collect();
+        let results: Vec<String> = fragment_outcomes.iter().map(|o| o.result.clone()).collect();
         let combined_result = results.join("; ");
-        
+
         Outcome {
             outcome_type: if execution_trace.len() > 1 {
                 OutcomeType::Success
@@ -104,7 +100,7 @@ pub fn execute_eeg_with_context(
             confidence: 0.5,
         }
     };
-    
+
     ExecutionResult {
         outcome,
         execution_trace,
@@ -116,13 +112,19 @@ pub fn execute_eeg_with_context(
 
 fn interpret_fragment(fragment: &MFragment) -> Outcome {
     match &fragment.content {
-        FragmentContent::EntityRelation { entity, relation, target } => Outcome {
+        FragmentContent::EntityRelation {
+            entity,
+            relation,
+            target,
+        } => Outcome {
             outcome_type: OutcomeType::Success,
             result: format!("{} {} {}", entity, relation, target),
             explanation: Some("Entity relation identified".to_string()),
             confidence: fragment.confidence,
         },
-        FragmentContent::CausalRule { condition, outcome, .. } => Outcome {
+        FragmentContent::CausalRule {
+            condition, outcome, ..
+        } => Outcome {
             outcome_type: OutcomeType::Success,
             result: format!("{} -> {}", condition, outcome),
             explanation: Some("Causal rule applied".to_string()),
@@ -152,27 +154,48 @@ fn interpret_fragment(fragment: &MFragment) -> Outcome {
             explanation: Some("Context signature identified".to_string()),
             confidence: fragment.confidence,
         },
-        FragmentContent::PersonalFact { person, fact_type, value, .. } => Outcome {
+        FragmentContent::PersonalFact {
+            person,
+            fact_type,
+            value,
+            ..
+        } => Outcome {
             outcome_type: OutcomeType::Success,
             result: format!("{} {} {}", person, fact_type, value),
             explanation: Some("Personal fact identified".to_string()),
             confidence: fragment.confidence,
         },
-        FragmentContent::TemporalEvent { event, time_expression, .. } => Outcome {
+        FragmentContent::TemporalEvent {
+            event,
+            time_expression,
+            ..
+        } => Outcome {
             outcome_type: OutcomeType::Success,
             result: format!("{} at {}", event, time_expression),
             explanation: Some("Temporal event identified".to_string()),
             confidence: fragment.confidence,
         },
-        FragmentContent::SpatialRelation { entity, location, .. } => Outcome {
+        FragmentContent::SpatialRelation {
+            entity, location, ..
+        } => Outcome {
             outcome_type: OutcomeType::Success,
             result: format!("{} at {}", entity, location),
             explanation: Some("Spatial relation identified".to_string()),
             confidence: fragment.confidence,
         },
-        FragmentContent::QuantitativeFact { entity, quantity, unit, .. } => Outcome {
+        FragmentContent::QuantitativeFact {
+            entity,
+            quantity,
+            unit,
+            ..
+        } => Outcome {
             outcome_type: OutcomeType::Success,
-            result: format!("{}: {} {}", entity, quantity, unit.as_ref().unwrap_or(&"".to_string())),
+            result: format!(
+                "{}: {} {}",
+                entity,
+                quantity,
+                unit.as_ref().unwrap_or(&"".to_string())
+            ),
             explanation: Some("Quantitative fact identified".to_string()),
             confidence: fragment.confidence,
         },
@@ -182,7 +205,12 @@ fn interpret_fragment(fragment: &MFragment) -> Outcome {
             explanation: Some("Hierarchical relation identified".to_string()),
             confidence: fragment.confidence,
         },
-        FragmentContent::SocialRelation { person1, person2, relation_type, .. } => Outcome {
+        FragmentContent::SocialRelation {
+            person1,
+            person2,
+            relation_type,
+            ..
+        } => Outcome {
             outcome_type: OutcomeType::Success,
             result: format!("{} {} {}", person1, relation_type, person2),
             explanation: Some("Social relation identified".to_string()),
@@ -194,13 +222,20 @@ fn interpret_fragment(fragment: &MFragment) -> Outcome {
             explanation: Some("Ownership relation identified".to_string()),
             confidence: fragment.confidence,
         },
-        FragmentContent::StateTransition { entity, from_state, to_state, .. } => Outcome {
+        FragmentContent::StateTransition {
+            entity,
+            from_state,
+            to_state,
+            ..
+        } => Outcome {
             outcome_type: OutcomeType::Success,
             result: format!("{}: {} -> {}", entity, from_state, to_state),
             explanation: Some("State transition identified".to_string()),
             confidence: fragment.confidence,
         },
-        FragmentContent::Capability { entity, capability, .. } => Outcome {
+        FragmentContent::Capability {
+            entity, capability, ..
+        } => Outcome {
             outcome_type: OutcomeType::Success,
             result: format!("{} can {}", entity, capability),
             explanation: Some("Capability identified".to_string()),
@@ -212,10 +247,11 @@ fn interpret_fragment(fragment: &MFragment) -> Outcome {
             explanation: Some("Belief identified".to_string()),
             confidence: fragment.confidence,
         },
-        FragmentContent::SemanticAtom { atom_type, content, .. } => {
-            
-            
-            let content_str: Vec<String> = content.iter()
+        FragmentContent::SemanticAtom {
+            atom_type, content, ..
+        } => {
+            let content_str: Vec<String> = content
+                .iter()
                 .map(|(k, v)| format!("{}: {}", k, v))
                 .collect();
             let content_display = content_str.join(", ");
@@ -225,6 +261,6 @@ fn interpret_fragment(fragment: &MFragment) -> Outcome {
                 explanation: Some("Semantic atom identified".to_string()),
                 confidence: fragment.confidence,
             }
-        },
+        }
     }
 }

@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Nolan Taft
-use crate::types::*;
 use crate::fossilization::*;
+use crate::types::*;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
@@ -13,21 +13,18 @@ pub fn compile_thought_with_modules(
     memory: &mut crate::types::MemoryGraph,
     compiled_modules: Option<&[CompiledModule]>,
 ) -> EEG {
-    
     if let Some(modules) = compiled_modules {
         if let Some(module) = find_applicable_module(context, modules) {
-            
             return create_eeg_from_module(module, context);
         }
     }
-    
-    
+
     let activated = memory.activate_fragments(context);
-    
+
     if activated.is_empty() {
         return create_empty_eeg(&context);
     }
-    
+
     let resolved = resolve_conflicts(&activated, memory);
     let filled = fill_gaps(&resolved, memory, context);
     let ordered = order_fragments(&filled, memory);
@@ -37,11 +34,9 @@ pub fn compile_thought_with_modules(
 }
 
 fn create_eeg_from_module(module: &CompiledModule, _context: &ContextVector) -> EEG {
-    
-    
     let node_id = Uuid::new_v4();
     let mut nodes = HashMap::new();
-    
+
     nodes.insert(
         node_id,
         EEGNode {
@@ -53,10 +48,10 @@ fn create_eeg_from_module(module: &CompiledModule, _context: &ContextVector) -> 
             },
             confidence: module.confidence,
             source_fragments: vec![module.source_pattern],
-            execution_cost: 0.1, 
+            execution_cost: 0.1,
         },
     );
-    
+
     EEG {
         nodes,
         edges: Vec::new(),
@@ -74,9 +69,9 @@ fn create_eeg_from_module(module: &CompiledModule, _context: &ContextVector) -> 
 fn resolve_conflicts(activated: &HashSet<Uuid>, memory: &crate::types::MemoryGraph) -> Vec<Uuid> {
     let mut resolved = Vec::new();
     let mut conflicts = Vec::new();
-    
+
     let fragment_list: Vec<Uuid> = activated.iter().copied().collect();
-    
+
     for i in 0..fragment_list.len() {
         let frag1_id = fragment_list[i];
         if let Some(frag1) = memory.fragments.get(&frag1_id) {
@@ -88,28 +83,40 @@ fn resolve_conflicts(activated: &HashSet<Uuid>, memory: &crate::types::MemoryGra
                     }
                 }
             }
-            
+
             resolved.push(frag1_id);
         }
     }
-    
+
     resolved
 }
 
 fn check_conflict(frag1: &MFragment, frag2: &MFragment) -> bool {
     match (&frag1.content, &frag2.content) {
         (
-            FragmentContent::EntityRelation { entity: e1, relation: r1, target: t1 },
-            FragmentContent::EntityRelation { entity: e2, relation: r2, target: t2 },
-        ) => {
-            e1 == e2 && r1 == r2 && t1 != t2
-        }
+            FragmentContent::EntityRelation {
+                entity: e1,
+                relation: r1,
+                target: t1,
+            },
+            FragmentContent::EntityRelation {
+                entity: e2,
+                relation: r2,
+                target: t2,
+            },
+        ) => e1 == e2 && r1 == r2 && t1 != t2,
         (
-            FragmentContent::CausalRule { condition: c1, outcome: o1, .. },
-            FragmentContent::CausalRule { condition: c2, outcome: o2, .. },
-        ) => {
-            c1 == c2 && o1 != o2
-        }
+            FragmentContent::CausalRule {
+                condition: c1,
+                outcome: o1,
+                ..
+            },
+            FragmentContent::CausalRule {
+                condition: c2,
+                outcome: o2,
+                ..
+            },
+        ) => c1 == c2 && o1 != o2,
         _ => false,
     }
 }
@@ -120,7 +127,7 @@ fn fill_gaps(
     _context: &ContextVector,
 ) -> Vec<OrderedNode> {
     let mut nodes = Vec::new();
-    
+
     for &frag_id in resolved {
         if let Some(fragment) = memory.fragments.get(&frag_id) {
             nodes.push(OrderedNode {
@@ -131,7 +138,7 @@ fn fill_gaps(
             });
         }
     }
-    
+
     if nodes.len() < 3 {
         let gap_id = Uuid::new_v4();
         nodes.push(OrderedNode {
@@ -141,7 +148,7 @@ fn fill_gaps(
             confidence: 0.5,
         });
     }
-    
+
     nodes
 }
 
@@ -153,19 +160,32 @@ struct OrderedNode {
     confidence: f64,
 }
 
-fn order_fragments(ordered_nodes: &[OrderedNode], memory: &crate::types::MemoryGraph) -> Vec<OrderedNode> {
+fn order_fragments(
+    ordered_nodes: &[OrderedNode],
+    memory: &crate::types::MemoryGraph,
+) -> Vec<OrderedNode> {
     let mut result = ordered_nodes.to_vec();
-    
+
     result.sort_by(|a, b| {
-        let a_conf = memory.fragments.get(&a.id).map(|f| f.confidence).unwrap_or(a.confidence);
-        let b_conf = memory.fragments.get(&b.id).map(|f| f.confidence).unwrap_or(b.confidence);
-        b_conf.partial_cmp(&a_conf).unwrap_or(std::cmp::Ordering::Equal)
+        let a_conf = memory
+            .fragments
+            .get(&a.id)
+            .map(|f| f.confidence)
+            .unwrap_or(a.confidence);
+        let b_conf = memory
+            .fragments
+            .get(&b.id)
+            .map(|f| f.confidence)
+            .unwrap_or(b.confidence);
+        b_conf
+            .partial_cmp(&a_conf)
+            .unwrap_or(std::cmp::Ordering::Equal)
     });
-    
+
     for (i, node) in result.iter_mut().enumerate() {
         node.order = i;
     }
-    
+
     result
 }
 
@@ -175,10 +195,10 @@ fn add_branching(
     _context: &ContextVector,
 ) -> Vec<OrderedNode> {
     let mut branched = Vec::new();
-    
+
     for node in ordered {
         branched.push(node.clone());
-        
+
         if let NodeType::FragmentNode = node.node_type {
             if let Some(fragment) = memory.fragments.get(&node.id) {
                 if let FragmentContent::CausalRule { .. } = &fragment.content {
@@ -193,13 +213,13 @@ fn add_branching(
             }
         }
     }
-    
+
     branched
 }
 
 fn prune_resources(branched: &[OrderedNode], context: &ContextVector) -> Vec<OrderedNode> {
     let threshold = context.confidence_threshold + (context.time_pressure * 0.2);
-    
+
     branched
         .iter()
         .filter(|node| node.confidence >= threshold)
@@ -214,14 +234,14 @@ fn construct_eeg(
 ) -> EEG {
     let mut nodes = HashMap::new();
     let mut edges = Vec::new();
-    
+
     if pruned.is_empty() {
         return create_empty_eeg(&context);
     }
-    
+
     let entry_point = pruned[0].id;
     let mut exit_points = Vec::new();
-    
+
     for node in pruned {
         let eeg_node = match node.node_type {
             NodeType::FragmentNode => {
@@ -265,14 +285,14 @@ fn construct_eeg(
             },
             _ => continue,
         };
-        
+
         nodes.insert(node.id, eeg_node);
-        
+
         if node.order == pruned.len() - 1 {
             exit_points.push(node.id);
         }
     }
-    
+
     for i in 0..pruned.len().saturating_sub(1) {
         edges.push(EEGEdge {
             from_node: pruned[i].id,
@@ -282,11 +302,11 @@ fn construct_eeg(
             weight: 1.0,
         });
     }
-    
+
     if exit_points.is_empty() && !pruned.is_empty() {
         exit_points.push(pruned[pruned.len() - 1].id);
     }
-    
+
     EEG {
         nodes,
         edges,
@@ -296,7 +316,8 @@ fn construct_eeg(
             compilation_timestamp: current_timestamp(),
             fragment_count: pruned.len(),
             estimated_execution_time: pruned.len() as f64,
-            confidence_score: pruned.iter().map(|n| n.confidence).sum::<f64>() / pruned.len() as f64,
+            confidence_score: pruned.iter().map(|n| n.confidence).sum::<f64>()
+                / pruned.len() as f64,
         },
     }
 }
@@ -318,7 +339,7 @@ fn create_empty_eeg(_context: &ContextVector) -> EEG {
             execution_cost: 1.0,
         },
     );
-    
+
     EEG {
         nodes,
         edges: Vec::new(),

@@ -13,7 +13,7 @@ pub fn create_test_context(goal: &str, domain: &str, time_pressure: f64) -> Cont
 pub fn create_test_fragments(count: usize, domain: &str) -> Vec<MFragment> {
     let mut fragments = Vec::new();
     let timestamp = current_timestamp();
-    
+
     for i in 0..count {
         let fragment = MFragment {
             id: Uuid::new_v4(),
@@ -34,15 +34,11 @@ pub fn create_test_fragments(count: usize, domain: &str) -> Vec<MFragment> {
         };
         fragments.push(fragment);
     }
-    
+
     fragments
 }
 
-pub fn create_causal_rule_fragment(
-    condition: &str,
-    outcome: &str,
-    confidence: f64,
-) -> MFragment {
+pub fn create_causal_rule_fragment(condition: &str, outcome: &str, confidence: f64) -> MFragment {
     MFragment {
         id: Uuid::new_v4(),
         fragment_type: FragmentType::CausalRule,
@@ -62,11 +58,7 @@ pub fn create_causal_rule_fragment(
     }
 }
 
-pub fn create_entity_relation_fragment(
-    entity: &str,
-    relation: &str,
-    target: &str,
-) -> MFragment {
+pub fn create_entity_relation_fragment(entity: &str, relation: &str, target: &str) -> MFragment {
     MFragment {
         id: Uuid::new_v4(),
         fragment_type: FragmentType::EntityRelation,

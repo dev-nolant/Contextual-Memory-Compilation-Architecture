@@ -355,14 +355,14 @@ CMCA is implemented in Rust and can be added to a project via Cargo using a path
 
 ```toml
 [dependencies]
-c-mer = { path = "../c-mer" }
+c-mer = { path = "../c-mer"}
 ```
 
 Or if using from a git repository:
 
 ```toml
 [dependencies]
-c-mer = { git = "https://github.com/dev-nolant/c-mer.git" }
+c-mer = { git = "https://github.com/dev-nolant/c-mer.git"}
 ```
 
 The system requires the following dependencies:

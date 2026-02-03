@@ -1,8 +1,8 @@
 // Copyright (c) 2026 Nolan Taft
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
-use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum EventType {
@@ -19,17 +19,17 @@ pub enum AtomType {
     Condition,
     Outcome,
     Property,
-    
-    Person,      
-    Location,    
-    Time,        
-    Quantity,    
-    Concept,     
-    Object,      
-    Event,       
-    Attribute,   
-    State,       
-    Resource,    
+
+    Person,
+    Location,
+    Time,
+    Quantity,
+    Concept,
+    Object,
+    Event,
+    Attribute,
+    State,
+    Resource,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -38,31 +38,31 @@ pub enum RelationType {
     Temporal,
     Semantic,
     Spatial,
-    
-    Ownership,        
-    PartOf,          
-    SimilarTo,       
-    OppositeOf,      
-    Causes,          
-    Prevents,        
-    Enables,         
-    Requires,        
-    LocatedAt,       
-    OccursAt,        
-    ParticipatesIn,  
-    Knows,           
-    Likes,           
-    Dislikes,        
-    RelatedTo,       
-    Hierarchical,    
-    Before,          
-    After,           
-    During,          
-    Simultaneous,    
-    GreaterThan,     
-    LessThan,        
-    EqualTo,         
-    Approximately,   
+
+    Ownership,
+    PartOf,
+    SimilarTo,
+    OppositeOf,
+    Causes,
+    Prevents,
+    Enables,
+    Requires,
+    LocatedAt,
+    OccursAt,
+    ParticipatesIn,
+    Knows,
+    Likes,
+    Dislikes,
+    RelatedTo,
+    Hierarchical,
+    Before,
+    After,
+    During,
+    Simultaneous,
+    GreaterThan,
+    LessThan,
+    EqualTo,
+    Approximately,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -99,18 +99,18 @@ pub enum FragmentType {
     Constraint,
     Preference,
     ContextSignature,
-    
-    PersonalFact,        
-    TemporalEvent,       
-    SpatialRelation,     
-    QuantitativeFact,    
-    HierarchicalRelation, 
-    SocialRelation,      
-    OwnershipRelation,   
-    StateTransition,     
-    Capability,          
-    Belief,              
-    SemanticAtom,        
+
+    PersonalFact,
+    TemporalEvent,
+    SpatialRelation,
+    QuantitativeFact,
+    HierarchicalRelation,
+    SocialRelation,
+    OwnershipRelation,
+    StateTransition,
+    Capability,
+    Belief,
+    SemanticAtom,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -144,46 +144,46 @@ pub enum FragmentContent {
         pattern: String,
         typical_activations: Vec<Uuid>,
     },
-    
+
     PersonalFact {
         person: String,
-        fact_type: String,  
+        fact_type: String,
         value: String,
         confidence: f64,
     },
     TemporalEvent {
         event: String,
-        time_expression: String,  
+        time_expression: String,
         duration: Option<String>,
-        frequency: Option<String>,  
+        frequency: Option<String>,
         confidence: f64,
     },
     SpatialRelation {
         entity: String,
         location: String,
-        relation_type: String,  
+        relation_type: String,
         distance: Option<String>,
         confidence: f64,
     },
     QuantitativeFact {
         entity: String,
         quantity: f64,
-        unit: Option<String>,  
-        comparison: Option<String>,  
-        reference: Option<String>,  
+        unit: Option<String>,
+        comparison: Option<String>,
+        reference: Option<String>,
         confidence: f64,
     },
     HierarchicalRelation {
         parent: String,
         child: String,
-        relation_type: String,  
-        level: Option<usize>,  
+        relation_type: String,
+        level: Option<usize>,
         confidence: f64,
     },
     SocialRelation {
         person1: String,
         person2: String,
-        relation_type: String,  
+        relation_type: String,
         strength: f64,
         context: Option<String>,
         confidence: f64,
@@ -191,7 +191,7 @@ pub enum FragmentContent {
     OwnershipRelation {
         owner: String,
         owned: String,
-        relation_type: String,  
+        relation_type: String,
         confidence: f64,
     },
     StateTransition {
@@ -205,21 +205,21 @@ pub enum FragmentContent {
     Capability {
         entity: String,
         capability: String,
-        level: Option<f64>,  
+        level: Option<f64>,
         context: Option<String>,
         confidence: f64,
     },
     Belief {
-        entity: String,  
+        entity: String,
         belief: String,
-        confidence_level: f64,  
+        confidence_level: f64,
         evidence: Option<String>,
         context: Option<String>,
     },
     SemanticAtom {
         atom_type: AtomType,
-        content: HashMap<String, String>,  
-        atom_id: Option<Uuid>,  
+        content: HashMap<String, String>,
+        atom_id: Option<Uuid>,
     },
 }
 
@@ -270,7 +270,7 @@ pub struct CoActivationPattern {
     pub activation_count: usize,
     pub average_confidence: f64,
     pub last_activated: f64,
-    pub formatting_pattern: Option<String>, 
+    pub formatting_pattern: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -507,8 +507,8 @@ pub struct OutcomePattern {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FossilizationCandidate {
-    pub pattern_type: String, 
-    pub pattern_id: Uuid, 
+    pub pattern_type: String,
+    pub pattern_id: Uuid,
     pub repetition_count: usize,
     pub average_confidence: f64,
     pub context_variance: f64,

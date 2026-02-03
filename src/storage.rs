@@ -1,8 +1,8 @@
 // Copyright (c) 2026 Nolan Taft
 use crate::types::MemoryGraph;
+use rmp_serde::{from_slice, to_vec};
 use std::fs;
 use std::path::Path;
-use rmp_serde::{to_vec, from_slice};
 
 pub type Result<T> = std::result::Result<T, StorageError>;
 
@@ -43,39 +43,29 @@ impl From<rmp_serde::decode::Error> for StorageError {
     }
 }
 
-
 pub fn save_memory(memory: &MemoryGraph, path: &Path) -> Result<()> {
-    
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
-    
-    
+
     let data = to_vec(memory)?;
-    
-    
+
     fs::write(path, data)?;
-    
+
     Ok(())
 }
 
-
 pub fn load_memory(path: &Path) -> Result<MemoryGraph> {
-    
     if !path.exists() {
-        return Err(StorageError::IoError(
-            std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                format!("Memory file not found: {}", path.display())
-            )
-        ));
+        return Err(StorageError::IoError(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("Memory file not found: {}", path.display()),
+        )));
     }
-    
-    
+
     let data = fs::read(path)?;
-    
-    
+
     let memory: MemoryGraph = from_slice(&data)?;
-    
+
     Ok(memory)
 }
