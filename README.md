@@ -2,6 +2,41 @@
 
 **Author:** Nolan Taft, 2026
 
+## Table of Contents
+
+- [Abstract](#abstract)
+- [Glossary](#glossary)
+- [Introduction](#introduction)
+  - [What is CMCA?](#what-is-cmca)
+  - [Problem Statement](#problem-statement)
+  - [Research Contributions](#research-contributions)
+- [Theoretical Foundations](#theoretical-foundations)
+  - [Cognitive Science Foundations](#cognitive-science-foundations)
+  - [Compiler Design Principles](#compiler-design-principles)
+  - [Graph Theory and Activation](#graph-theory-and-activation)
+- [Architecture Overview](#architecture-overview)
+  - [Data Flow](#data-flow)
+- [System Components](#system-components)
+  - [Experience Ingestion](#experience-ingestion)
+  - [Semantic Distillation](#semantic-distillation)
+  - [Memory Graph (M-IR)](#memory-graph-m-ir)
+  - [Context Model](#context-model)
+  - [Contextual Compiler](#contextual-compiler)
+  - [Execution Engine](#execution-engine)
+  - [Introspection and Linting](#introspection-and-linting)
+  - [Selective Fossilization](#selective-fossilization)
+- [Implementation Guide](#implementation-guide)
+  - [Basic Setup](#basic-setup)
+  - [Core API](#core-api)
+  - [LLM Integration](#llm-integration)
+  - [AI Agent Usage](#ai-agent-usage)
+  - [Advanced Usage](#advanced-usage)
+  - [Examples](#examples)
+- [Design Decisions](#design-decisions)
+- [Research Applications](#research-applications)
+- [Implementation Status](#implementation-status)
+- [References](#references)
+
 ## Abstract
 
 The Contextual Memory Compilation Architecture (CMCA) is a memory system that models human-like long-term memory through a novel combination of cognitive science principles, compiler design techniques, and graph theory. Unlike traditional memory systems that store raw transcripts or embeddings, CMCA stores memory as latent, non-executable fragments that are contextually compiled into executable thought graphs. The system implements natural forgetting through decay mechanisms, selective reinforcement through experience, and optimization through fossilization of frequently-used patterns. This architecture enables efficient, context-adaptive memory retrieval without the storage overhead of traditional approaches.
