@@ -630,9 +630,8 @@ The response builder provides fine-grained control over response generation:
 ```rust
 use c_mer::response_builder::*;
 
-let builder = ResponseBuilder::new();
 let memory_data = MemoryData::from_execution_and_memory(&result, &memory, query);
-let response = builder.build_response(&memory_data, &context)?;
+let response = ResponseBuilder::build_response(&result, &memory, &memory_data);
 ```
 
 #### Fossilization Control
@@ -641,6 +640,7 @@ Fossilization can be configured and controlled:
 
 ```rust
 use c_mer::fossilization::*;
+use c_mer::types::*;
 
 let config = FossilizationConfig {
     min_repetition: 5,
@@ -649,6 +649,7 @@ let config = FossilizationConfig {
     min_reward_correlation: 0.6,
     min_speedup: 1.5,
     max_candidates_per_run: 10,
+    preferred_module_type: ModuleType::FSM,
 };
 
 let candidates = select_fossilization_candidates(&pattern_report, &config);
