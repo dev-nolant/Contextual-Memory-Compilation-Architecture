@@ -1,0 +1,31 @@
+[package]
+name = "c-mer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+uuid = { version = "1.0", features = ["v4", "serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rmp-serde = "1.1"
+reqwest = { version = "0.11", features = ["json", "blocking"], optional = true }
+
+[features]
+default = []
+openai = ["dep:reqwest"]
+
+[[bin]]
+name = "c-mer"
+path = "src/main.rs"
+
+[[example]]
+name = "demo"
+path = "demo/demo.rs"
+
+[[example]]
+name = "ai_agent_demo"
+path = "demo/ai_agent_demo.rs"
+
+[lib]
+name = "c_mer"
+path = "src/lib.rs"
